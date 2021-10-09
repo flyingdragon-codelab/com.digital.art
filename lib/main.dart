@@ -301,7 +301,7 @@ class SignUpPageState extends State<SignUpPage> {
                         controller: nameController,
                         decoration: InputDecoration(
                           hintText: 'Name',
-                          suffixIcon: Icon(Icons.email),
+                          suffixIcon: Icon(Icons.person_rounded),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(20.0),
                           ),
