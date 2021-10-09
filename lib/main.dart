@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -12,6 +13,7 @@ void main() async {
     home: LandingPage(),
   ));
 }
+
 
 class LandingPage extends StatefulWidget {
 
@@ -171,7 +173,16 @@ class SignInPageState extends State<SignInPage> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text('Forget password?',style: TextStyle(fontSize: 12.0),),
+                                GestureDetector(
+                                  onTap: (){
+                                    Navigator.push(context, MaterialPageRoute(builder: (context)=>ForgetPasswordPage()));
+                                  },
+                                  child: Text.rich(
+                                    TextSpan(
+                                        text: 'Forget password?',
+                                    ),
+                                  ),
+                                ),
                                 RaisedButton(
                                   child: Text('Login'),
                                   color: Color(0xffEE7B23),
@@ -212,7 +223,7 @@ class SignInPageState extends State<SignInPage> {
                           SizedBox(height:20.0),
                           GestureDetector(
                             onTap: (){
-                              Navigator.push(context, MaterialPageRoute(builder: (context)=>Second()));
+                              Navigator.push(context, MaterialPageRoute(builder: (context)=>SignUpPage()));
                             },
                             child: Text.rich(
                               TextSpan(
@@ -244,13 +255,14 @@ class SignInPageState extends State<SignInPage> {
 
 
 
-
-class Second extends StatefulWidget {
+class SignUpPage extends StatefulWidget {
   @override
-  _SecondState createState() => _SecondState();
+  SignUpPageState createState() => SignUpPageState();
 }
 
-class _SecondState extends State<Second> {
+class SignUpPageState extends State<SignUpPage> {
+  final firestoreInstance = FirebaseFirestore.instance;
+  final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
@@ -282,6 +294,17 @@ class _SecondState extends State<Second> {
                           children: [
                             Text('Signup',style: TextStyle(fontSize: 25.0,fontWeight: FontWeight.bold),),
                           ],
+                        ),
+                      ),
+                      SizedBox(height: 30.0,),
+                      TextField(
+                        controller: nameController,
+                        decoration: InputDecoration(
+                          hintText: 'Name',
+                          suffixIcon: Icon(Icons.email),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
                         ),
                       ),
                       SizedBox(height: 30.0,),
@@ -324,6 +347,16 @@ class _SecondState extends State<Second> {
                                   )).user;
                                   if (result != null) {
                                     Navigator.push(context, MaterialPageRoute(builder: (context)=>LandingPage()));
+                                    firestoreInstance.collection("users").doc(result.uid).set(
+                                      {
+                                        "Name": nameController.text,
+                                        "Email": emailController.text,
+                                        "UID": result.uid
+                                      }
+                                    ).then((value) {
+                                      print('data storage success!');
+                                    }
+                                    );
                                   }
                                 } catch (e) {
                                   showDialog(
@@ -347,6 +380,136 @@ class _SecondState extends State<Second> {
                               },
                             ),
                           ],
+                        ),
+                      ),
+                      SizedBox(height:20.0),
+                      GestureDetector(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>SignInPage()));
+                        },
+                        child: Text.rich(
+                          TextSpan(
+                              text: 'Already have an account ',
+                              children: [
+                                TextSpan(
+                                  text: 'Signin',
+                                  style: TextStyle(
+                                      color: Color(0xffEE7B23)
+                                  ),
+                                ),
+                              ]
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
+
+class ForgetPasswordPage extends StatefulWidget {
+  @override
+  ForgetPasswordPageState createState() => ForgetPasswordPageState();
+}
+
+class ForgetPasswordPageState extends State<ForgetPasswordPage> {
+  final emailController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    double width=MediaQuery.of(context).size.width;
+    double height=MediaQuery.of(context).size.height;
+    return Scaffold(
+      body: Container(
+        height: height,
+        width: width,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: width,
+                height: height*0.45,
+                child: Image.asset('assets/play.png',fit: BoxFit.fill,),
+              ),
+              Container(
+                  width: width * 0.8,
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text('Forget Password',style: TextStyle(fontSize: 25.0,fontWeight: FontWeight.bold),),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 30.0,),
+                      TextField(
+                        controller: emailController,
+                        decoration: InputDecoration(
+                          hintText: 'Email',
+                          suffixIcon: Icon(Icons.email),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20.0),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 30.0,),
+                      Center(
+                        child: ElevatedButton(
+                          child: Text('Submit'),
+                          onPressed: () async {
+                            try{
+                              await FirebaseAuth.instance.sendPasswordResetEmail(
+                                  email: emailController.text
+                              );
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: new Text("Email Sent!!"),
+                                    content: new Text('Password Reset Email has been sent!'),
+                                    actions: <Widget>[
+                                      new FlatButton(
+                                        child: new Text("OK"),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                          Navigator.pop(context);
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            } catch (e) {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: new Text("Alert!!"),
+                                    content: new Text(e.toString()),
+                                    actions: <Widget>[
+                                      new FlatButton(
+                                        child: new Text("OK"),
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+                          },
                         ),
                       ),
                       SizedBox(height:20.0),
