@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "311991167689",
+    "project_id": "digital-art-31ec8",
+    "storage_bucket": "digital-art-31ec8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:311991167689:android:761ddc7ed9284393d8bb18",
+        "android_client_info": {
+          "package_name": "com.digital.art"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "311991167689-d8o3n6lk70qmr9hsnfvg4hg3fgfncmfv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBScwXrb4utWSI1nf-VEYwD1WQvToRsHXA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "311991167689-d8o3n6lk70qmr9hsnfvg4hg3fgfncmfv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
