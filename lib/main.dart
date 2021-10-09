@@ -72,7 +72,7 @@ class LandingPageState extends State<LandingPage> {
               child: Text('' + (user == null ? 'Not login' : 'Log out') ),
               onPressed: () async {
                 await FirebaseAuth.instance.signOut();
-                Navigator.of(context).pop();
+                setState(() {});
               },
             ),
           ),
