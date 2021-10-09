@@ -6,52 +6,82 @@ import 'package:http/http.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(LandingPage());
+  runApp(MaterialApp(
+    debugShowCheckedModeBanner: false,
+    home: LandingPage(),
+  ));
 }
 
-class LandingPage extends StatelessWidget {
+class LandingPage extends StatefulWidget {
+
+  @override
+  LandingPageState createState() => LandingPageState();
+}
+
+class LandingPageState extends State<LandingPage> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     User? user = FirebaseAuth.instance.currentUser;
-    return MaterialApp(
-      title: 'Welcome to Digital Art',
-      debugShowCheckedModeBanner: false,
-      home: Builder(
-        builder: (context) => Column(
-          children: [
-            Container(
-              child: RaisedButton(
-                child: Text('' + (user == null ? 'Already Login' : 'Must Login 123') ),
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context)=>Second()));
-                },
-              ),
-            ),
-            GestureDetector(
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>Second()));
+
+    double width=MediaQuery.of(context).size.width;
+    double height=MediaQuery.of(context).size.height;
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Demo Login UI'),
+        automaticallyImplyLeading: false,
+      ),
+      body: Column(
+        children: [
+          Container(
+            child: RaisedButton(
+              child: Text('' + (user == null ? 'Must login' : 'userID: ' + user.uid) ),
+              onPressed: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SignInPage()));
               },
-              child: Text.rich(
-                TextSpan(
-                    text: 'Don\'t have an account ',
-                    children: [
-                      TextSpan(
-                        text: 'Signup',
-                        style: TextStyle(
-                            color: Color(0xffEE7B23)
-                        ),
-                      ),
-                    ]
-                ),
-              ),
             ),
-          ],
-        ),
-      )
+          ),
+          Container(
+            child: RaisedButton(
+              child: Text('Alert box here'),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: new Text("Alert!!"),
+                      content: new Text("You are awesome!"),
+                      actions: <Widget>[
+                        new FlatButton(
+                          child: new Text("OK"),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+          Container(
+            child: RaisedButton(
+              child: Text('' + (user == null ? 'Not login' : 'Log out') ),
+              onPressed: () async {
+                await FirebaseAuth.instance.signOut();
+                Navigator.of(context).pop();
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
+
 
 
 class SignInPage extends StatefulWidget {
@@ -63,11 +93,10 @@ class SignInPage extends StatefulWidget {
 class SignInPageState extends State<SignInPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  bool validUser = true;
 
   @override
   Widget build(BuildContext context) {
-    User? user = FirebaseAuth.instance.currentUser;
-
     double width=MediaQuery.of(context).size.width;
     double height=MediaQuery.of(context).size.height;
     return Scaffold(
@@ -134,10 +163,34 @@ class SignInPageState extends State<SignInPage> {
                                   child: Text('Login'),
                                   color: Color(0xffEE7B23),
                                   onPressed: () async {
-                                    await FirebaseAuth.instance.signInWithEmailAndPassword(
+                                    try {
+                                      dynamic result = (await FirebaseAuth.instance.signInWithEmailAndPassword(
                                         email: emailController.text,
                                         password: passwordController.text,
-                                    );
+                                      )).user;
+                                      if (result != null) {
+                                        Navigator.push(context, MaterialPageRoute(builder: (context)=>LandingPage()));
+                                      }
+                                    } catch (e) {
+                                      print(e.toString());
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: new Text("Alert!!"),
+                                            content: new Text(e.toString()),
+                                            actions: <Widget>[
+                                              new FlatButton(
+                                                child: new Text("OK"),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    }
                                   },
                                 ),
                               ],
@@ -175,6 +228,7 @@ class SignInPageState extends State<SignInPage> {
     );
   }
 }
+
 
 
 class Second extends StatefulWidget {
@@ -249,10 +303,33 @@ class _SecondState extends State<Second> {
                             ElevatedButton(
                               child: Text('Signup'),
                               onPressed: () async {
-                                await FirebaseAuth.instance.createUserWithEmailAndPassword(
-                                    email: emailController.text,
-                                    password: passwordController.text
-                                );
+                                try{
+                                  dynamic result = (await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                                      email: emailController.text,
+                                      password: passwordController.text
+                                  )).user;
+                                  if (result != null) {
+                                    Navigator.push(context, MaterialPageRoute(builder: (context)=>LandingPage()));
+                                  }
+                                } catch (e) {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: new Text("Alert!!"),
+                                        content: new Text(e.toString()),
+                                        actions: <Widget>[
+                                          new FlatButton(
+                                            child: new Text("OK"),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                }
                               },
                             ),
                           ],
