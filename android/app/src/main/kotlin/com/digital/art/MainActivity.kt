@@ -1,4 +1,4 @@
-package com.digital.digital_app
+package com.digital.art
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,3 +1,4 @@
+import 'package:digital_app/Services/AuthenticationServiceManager.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +6,7 @@ import 'package:http/http.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-//  await Firebase.initializeApp();
+  await Firebase.initializeApp();
   runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
       home: MyHomePage()
@@ -204,7 +205,9 @@ class _SecondState extends State<Second> {
                             RaisedButton(
                               child: Text('Signup'),
                               color: Color(0xffEE7B23),
-                              onPressed: (){},
+                              onPressed: (){
+                                //something here
+                              },
                             ),
                           ],
                         ),

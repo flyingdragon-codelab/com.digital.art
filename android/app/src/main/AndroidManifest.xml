@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.digital.digital_app">
+    package="com.digital.art">
    <application
         android:label="digital_app"
         android:icon="@mipmap/ic_launcher">
