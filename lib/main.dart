@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 
@@ -33,50 +34,62 @@ class LandingPageState extends State<LandingPage> {
         title: Text('Demo Login UI'),
         automaticallyImplyLeading: false,
       ),
-      body: Column(
-        children: [
-          Container(
-            child: RaisedButton(
-              child: Text('' + (user == null ? 'Must login' : 'userID: ' + user.uid) ),
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SignInPage()));
-              },
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage((user == null ? 'assets/bkg_08_august.jpg' : 'assets/bkg_12_december.jpg')),
+            fit: BoxFit.cover,
+          )
+        ),
+          height: height,
+          width: width,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
+                    width: width * 0.8,
+                    child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text((user == null ? 'Login' : 'Hi User') ,style: TextStyle(fontSize: 25.0,fontWeight: FontWeight.bold),),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 30.0,),
+                          OutlinedButton(
+                            child: Container(
+                              width: width * 0.4,
+                              height: 60,
+                              child: Center(
+                                  child: Text((user == null ? 'Next' : 'Logout') )
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              primary: Colors.white,
+                              backgroundColor: Colors.teal,
+                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+                            ),
+                            onPressed: () async {
+                              (user == null)
+                                  ? {Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SignInPage()))}
+                                  : {await FirebaseAuth.instance.signOut(), setState(() {}), };
+                            },
+                          ),
+                          Container(
+                            height: 50,
+                          ),
+                        ]
+                    )
+                ),
+              ],
             ),
-          ),
-          Container(
-            child: RaisedButton(
-              child: Text('Alert box here'),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: new Text("Alert!!"),
-                      content: new Text("You are awesome!"),
-                      actions: <Widget>[
-                        new FlatButton(
-                          child: new Text("OK"),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-          Container(
-            child: RaisedButton(
-              child: Text('' + (user == null ? 'Not login' : 'Log out') ),
-              onPressed: () async {
-                await FirebaseAuth.instance.signOut();
-                setState(() {});
-              },
-            ),
-          ),
-        ],
+          )
       ),
     );
   }
@@ -102,7 +115,7 @@ class SignInPageState extends State<SignInPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Demo Login UI'),
-        automaticallyImplyLeading: false,
+      //  automaticallyImplyLeading: false,
       ),
       body: Container(
           height: height,
@@ -220,7 +233,7 @@ class SignInPageState extends State<SignInPage> {
                           ),
                         ]
                     )
-                )
+                ),
               ],
             ),
           )
@@ -228,6 +241,7 @@ class SignInPageState extends State<SignInPage> {
     );
   }
 }
+
 
 
 
