@@ -1,4 +1,3 @@
-import 'package:digital_app/Services/AuthenticationServiceManager.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -7,30 +6,68 @@ import 'package:http/http.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: MyHomePage()
-  )
-  );
+  runApp(LandingPage());
 }
 
-class MyHomePage extends StatefulWidget {
-
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
+class LandingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    User? user = FirebaseAuth.instance.currentUser;
+    return MaterialApp(
+      title: 'Welcome to Digital Art',
+      debugShowCheckedModeBanner: false,
+      home: Builder(
+        builder: (context) => Column(
+          children: [
+            Container(
+              child: RaisedButton(
+                child: Text('' + (user == null ? 'Already Login' : 'Must Login 123') ),
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context)=>Second()));
+                },
+              ),
+            ),
+            GestureDetector(
+              onTap: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>Second()));
+              },
+              child: Text.rich(
+                TextSpan(
+                    text: 'Don\'t have an account ',
+                    children: [
+                      TextSpan(
+                        text: 'Signup',
+                        style: TextStyle(
+                            color: Color(0xffEE7B23)
+                        ),
+                      ),
+                    ]
+                ),
+              ),
+            ),
+          ],
+        ),
+      )
+    );
+  }
+}
+
+
+class SignInPage extends StatefulWidget {
+
+  @override
+  SignInPageState createState() => SignInPageState();
+}
+
+class SignInPageState extends State<SignInPage> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    User? user = FirebaseAuth.instance.currentUser;
+
     double width=MediaQuery.of(context).size.width;
     double height=MediaQuery.of(context).size.height;
     return Scaffold(
@@ -65,6 +102,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                           SizedBox(height: 30.0,),
                           TextField(
+                            controller: emailController,
                             decoration: InputDecoration(
                               hintText: 'Email',
                               suffixIcon: Icon(Icons.email),
@@ -75,6 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           ),
                           SizedBox(height: 20.0,),
                           TextField(
+                            controller: passwordController,
                             obscureText: true,
                             decoration: InputDecoration(
                               hintText: 'Password',
@@ -94,7 +133,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                 RaisedButton(
                                   child: Text('Login'),
                                   color: Color(0xffEE7B23),
-                                  onPressed: (){},
+                                  onPressed: () async {
+                                    await FirebaseAuth.instance.signInWithEmailAndPassword(
+                                        email: emailController.text,
+                                        password: passwordController.text,
+                                    );
+                                  },
                                 ),
                               ],
                             ),
@@ -128,11 +172,6 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           )
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
@@ -144,6 +183,9 @@ class Second extends StatefulWidget {
 }
 
 class _SecondState extends State<Second> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     double width=MediaQuery.of(context).size.width;
@@ -176,6 +218,7 @@ class _SecondState extends State<Second> {
                       ),
                       SizedBox(height: 30.0,),
                       TextField(
+                        controller: emailController,
                         decoration: InputDecoration(
                           hintText: 'Email',
                           suffixIcon: Icon(Icons.email),
@@ -186,6 +229,7 @@ class _SecondState extends State<Second> {
                       ),
                       SizedBox(height: 20.0,),
                       TextField(
+                        controller: passwordController,
                         obscureText: true,
                         decoration: InputDecoration(
                           hintText: 'Password',
@@ -202,11 +246,13 @@ class _SecondState extends State<Second> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text('Forget password?',style: TextStyle(fontSize: 12.0),),
-                            RaisedButton(
+                            ElevatedButton(
                               child: Text('Signup'),
-                              color: Color(0xffEE7B23),
-                              onPressed: (){
-                                //something here
+                              onPressed: () async {
+                                await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                                    email: emailController.text,
+                                    password: passwordController.text
+                                );
                               },
                             ),
                           ],
@@ -215,7 +261,7 @@ class _SecondState extends State<Second> {
                       SizedBox(height:20.0),
                       GestureDetector(
                         onTap: (){
-                          Navigator.push(context, MaterialPageRoute(builder: (context)=>MyHomePage()));
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=>SignInPage()));
                         },
                         child: Text.rich(
                           TextSpan(
