@@ -67,7 +67,14 @@ class LandingPageState extends State<LandingPage> {
   @override
   Widget build(BuildContext context) {
     User? user = FirebaseAuth.instance.currentUser;
-    getUserProfile(user);
+    (user != null)
+        ? firestoreInstance.collection("users").doc(user.uid).get().then((value){
+      print(value.data());
+      setState(() {
+        userProfile = value.data();
+      });
+    })
+        : null;
  //   var profile = firestoreInstance.collection("users").doc(user!.uid).get();
  //   print(profile);
     double width=MediaQuery.of(context).size.width;
