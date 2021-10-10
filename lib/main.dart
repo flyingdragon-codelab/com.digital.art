@@ -1,11 +1,14 @@
 import 'dart:convert';
-
+import 'dart:io';
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:image_picker/image_picker.dart';
+
 
 final firestoreInstance = FirebaseFirestore.instance;
 
@@ -38,6 +41,15 @@ class LandingPageState extends State<LandingPage> {
       setState(() {
         userProfile = value.data();
       });
+    });
+  }
+
+  /// Get from gallery
+  PickedFile? _image;
+  Future getImageFromGallery() async {
+    var image = await ImagePicker.platform.getImage(source: ImageSource.gallery);
+    setState(() {
+      _image = image as PickedFile?;
     });
   }
 
@@ -91,6 +103,14 @@ class LandingPageState extends State<LandingPage> {
                               ],
                             ),
                           ),
+                          Image.memory(base64Decode('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')),
+                          Container(
+                            child: Center(
+                              child: _image == null
+                              ? Text('No image')
+                              : Image.file(File(_image!.path)),
+                            ),
+                          ),
                           SizedBox(height: 30.0,),
                           (userProfile != null)
                           ? OutlinedButton(
@@ -107,6 +127,9 @@ class LandingPageState extends State<LandingPage> {
                               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
                             ),
                             onPressed: () async {
+                              getImageFromGallery();
+
+                              /*
                               firestoreInstance.collection("users").doc(userProfile['UID']).collection("collections").add(
                                   {
                                     "ArtName": "Sunny Beach",
@@ -117,6 +140,7 @@ class LandingPageState extends State<LandingPage> {
                                 print('data storage success!');
                               }
                               );
+                              */
                             },
                           )
                               : Container(),
