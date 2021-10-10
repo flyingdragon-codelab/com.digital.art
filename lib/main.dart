@@ -1,9 +1,13 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+
+final firestoreInstance = FirebaseFirestore.instance;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,22 +28,46 @@ class LandingPage extends StatefulWidget {
 class LandingPageState extends State<LandingPage> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  var userProfile;
+
+  @override
+  void initState() {
+    User? user = FirebaseAuth.instance.currentUser;
+    firestoreInstance.collection("users").doc(user!.uid).get().then((value){
+      print(value.data());
+      setState(() {
+        userProfile = value.data();
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     User? user = FirebaseAuth.instance.currentUser;
-
     double width=MediaQuery.of(context).size.width;
     double height=MediaQuery.of(context).size.height;
     return Scaffold(
       appBar: AppBar(
-        title: Text('Demo Login UI'),
+        title: Row(
+          children: [
+            Text((userProfile == null ? 'Login' : 'Hola ' + userProfile['Name'] + '!' )),
+            Expanded(child: Container()),
+            GestureDetector(
+              child: Icon((userProfile == null) ?  Icons.person  : Icons.logout),
+              onTap: () async {
+                (user == null)
+                    ? {Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SignInPage()))}
+                    : {await FirebaseAuth.instance.signOut(), setState(() {userProfile = null;}), };
+              },
+            )
+          ],
+        ),
         automaticallyImplyLeading: false,
       ),
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage((user == null ? 'assets/bkg_08_august.jpg' : 'assets/bkg_12_december.jpg')),
+            image: AssetImage((userProfile == null ? 'assets/bkg_08_august.jpg' : 'assets/bkg_12_december.jpg')),
             fit: BoxFit.cover,
           )
         ),
@@ -59,17 +87,18 @@ class LandingPageState extends State<LandingPage> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.start,
                               children: [
-                                Text((user == null ? 'Login' : 'Hi User') ,style: TextStyle(fontSize: 25.0,fontWeight: FontWeight.bold),),
+                                Text((userProfile == null ? '' : '' ) ,style: TextStyle(fontSize: 25.0,fontWeight: FontWeight.bold),),
                               ],
                             ),
                           ),
                           SizedBox(height: 30.0,),
-                          OutlinedButton(
+                          (userProfile != null)
+                          ? OutlinedButton(
                             child: Container(
                               width: width * 0.4,
                               height: 60,
                               child: Center(
-                                  child: Text((user == null ? 'Next' : 'Logout') )
+                                  child: Text('Add Data')
                               ),
                             ),
                             style: OutlinedButton.styleFrom(
@@ -78,14 +107,19 @@ class LandingPageState extends State<LandingPage> {
                               shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
                             ),
                             onPressed: () async {
-                              (user == null)
-                                  ? {Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SignInPage()))}
-                                  : {await FirebaseAuth.instance.signOut(), setState(() {}), };
+                              firestoreInstance.collection("users").doc(userProfile['UID']).collection("collections").add(
+                                  {
+                                    "ArtName": "Sunny Beach",
+                                    "ArtPrice": 700,
+                                    "Category": "Scenery"
+                                  }
+                              ).then((value) {
+                                print('data storage success!');
+                              }
+                              );
                             },
-                          ),
-                          Container(
-                            height: 50,
-                          ),
+                          )
+                              : Container(),
                         ]
                     )
                 ),
