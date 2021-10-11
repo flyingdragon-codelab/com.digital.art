@@ -48,6 +48,18 @@ class LandingPageState extends State<LandingPage> {
   XFile? _image;
   Future getImageFromGallery() async {
     var image = await ImagePicker.platform.getImage(source: ImageSource.gallery);
+    var finalImage = image as XFile?;
+    firestoreInstance.collection("users").doc(userProfile['UID']).collection("collections").add(
+        {
+          "ArtName": "Sunset Color",
+          "ArtPrice": 700,
+          "Category": "Scenery",
+          "Media": base64Encode(File(finalImage!.path).readAsBytesSync())
+        }
+    ).then((value) {
+      print('data storage success!');
+    }
+    );
     setState(() {
       _image = image as XFile?;
     });
@@ -114,6 +126,14 @@ class LandingPageState extends State<LandingPage> {
                                   : Image.file(File(_image!.path)),
                             )
                           ),
+                          /*Container(
+                              height: 200.00,
+                              child: Center(
+                                child: _image == null
+                                    ? Text('No image selected')
+                                    : Text(base64Encode(File(_image!.path).readAsBytesSync())),
+                              )
+                          ),*/
                           SizedBox(height: 30.0,),
                           (user != null)
                           ? OutlinedButton(
@@ -131,18 +151,6 @@ class LandingPageState extends State<LandingPage> {
                             ),
                             onPressed: () async {
                               getImageFromGallery();
-                              /*
-                              firestoreInstance.collection("users").doc(userProfile['UID']).collection("collections").add(
-                                  {
-                                    "ArtName": "Sunny Beach",
-                                    "ArtPrice": 700,
-                                    "Category": "Scenery"
-                                  }
-                              ).then((value) {
-                                print('data storage success!');
-                              }
-                              );
-                              */
                             },
                           )
                               : Container(),
