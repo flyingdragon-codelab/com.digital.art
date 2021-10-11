@@ -70,7 +70,7 @@ class LandingPageState extends State<LandingPage> {
               onTap: () async {
                 (user == null)
                     ? {Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SignInPage()))}
-                    : {await FirebaseAuth.instance.signOut(), setState(() {user = null; _image = null;}), };
+                    : {await FirebaseAuth.instance.signOut(), setState(() {user = null; _image = null; userProfile = null;}), };
               },
             )
           ],
@@ -602,3 +602,7 @@ class ForgetPasswordPageState extends State<ForgetPasswordPage> {
     );
   }
 }
+
+
+
+
