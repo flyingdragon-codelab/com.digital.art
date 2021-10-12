@@ -33,6 +33,24 @@ class LandingPageState extends State<LandingPage> {
   var userProfile;
   List collections = [];
 
+  getAllCollections() async {
+    firestoreInstance.collection("users").get().then((value) {
+      value.docs.forEach((value) {
+        firestoreInstance.collection("users").doc(value.id).collection("collections").get().then((value) {
+          value.docs.forEach((element) {
+            setState(() {
+              collections.add(element.data());
+            });
+            //  print(element.data()['Name']);
+            //   print(element.data()['Filedata']);
+            //    print(collections);
+            //  print(collections.length);
+          });
+        });
+      });
+    });
+  }
+
   getUserProfile () async {
     var firebaseUser = FirebaseAuth.instance.currentUser;
     if(firebaseUser != null)  {
@@ -41,25 +59,13 @@ class LandingPageState extends State<LandingPage> {
         userProfile = result.data();
       });
     }
-    firestoreInstance.collection("users").get().then((value) {
-      value.docs.forEach((value) {
-        firestoreInstance.collection("users").doc(value.id).collection("collections").get().then((value) {
-          value.docs.forEach((element) {
-            collections.add(element.data());
-            //  print(element.data()['Name']);
-           //   print(element.data()['Filedata']);
-          //    print(collections);
-          //  print(collections.length);
-          });
-        });
-      });
-    });
   //  print(collections);
   }
 
   @override
   void initState() {
-    getUserProfile();
+    getAllCollections();
+  //  getUserProfile();
   }
 
   /// Get from gallery
@@ -136,19 +142,11 @@ class LandingPageState extends State<LandingPage> {
         automaticallyImplyLeading: false,
       ),
       body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            alignment: Alignment.bottomCenter,
-            image: AssetImage(
-                (user == null ? 'assets/flat1.jfif' : 'assets/High Five.png'),
-            ),
-            fit: BoxFit.fitWidth,
-          )
-        ),
           height: height,
           width: width,
           child: SingleChildScrollView(
-            child: Column(
+            child:
+            Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
@@ -156,7 +154,24 @@ class LandingPageState extends State<LandingPage> {
                     width: width * 0.8,
                     child: Column(
                         children: [
-                          TextField(
+                          OutlinedButton(
+                            child: Container(
+                              width: width * 0.4,
+                              height: 60,
+                              child: Center(
+                                  child: Text('Add Data')
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              primary: Colors.white,
+                              backgroundColor: Colors.teal,
+                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+                            ),
+                            onPressed: () async {
+                              getImageFromGallery(nameController.text, categoryController.text, int.parse(priceController.text));
+                            },
+                          ),
+                          /*TextField(
                             controller: nameController,
                             decoration: InputDecoration(
                               hintText: 'Name',
@@ -209,21 +224,21 @@ class LandingPageState extends State<LandingPage> {
                           )
                               : Container(),
                           SizedBox(height: 30.0,),
-                          /*(collections.length != 0) ? Container(
+                          Container(child: Text((collections.length != 0) ? 'Nbr of Collections - ' + collections.length.toString() : 'No Collections',)),*/
+                          SizedBox(height: 30.0,),
+                          (collections.length != 0) ? SizedBox(
                             height: 500,
                             child: ListView.builder(
                               shrinkWrap: true,
                               scrollDirection: Axis.horizontal,
                               itemCount: collections.length,
-                              itemBuilder: (context, index) => FittedBox(
-                                fit: BoxFit.cover,
-                                child: Image.memory(
-                                  base64Decode(collections[index]['Filedata']),
-                                //  fit: BoxFit.scaleDown,
-                                ),
+                              itemBuilder: (context, index) => Image.memory(
+                                base64Decode(collections[index]['Filedata']),
+                                  fit: BoxFit.cover,
                               )
                             ),
-                          )  : Text('nothing here - ' + collections.length.toString()),*/
+                          )  : Text('nothing here - ' + collections.length.toString()),
+                          SizedBox(height: 30.0,),
                         ]
                     )
                 ),
@@ -710,3 +725,207 @@ class ForgetPasswordPageState extends State<ForgetPasswordPage> {
 
 
 
+class AddFilePage extends StatefulWidget {
+
+  @override
+  AddFilePageState createState() => AddFilePageState();
+}
+
+class AddFilePageState extends State<AddFilePage> {
+  final nameController = TextEditingController();
+  final categoryController = TextEditingController();
+  final priceController = TextEditingController();
+  var userProfile;
+  List collections = [];
+
+  getUserProfile () async {
+    var firebaseUser = FirebaseAuth.instance.currentUser;
+    if(firebaseUser != null)  {
+      var result = await FirebaseFirestore.instance.collection("users").doc(firebaseUser.uid).get();
+      setState((){
+        userProfile = result.data();
+      });
+    }
+    //  print(collections);
+  }
+
+  @override
+  void initState() {
+    getUserProfile();
+  }
+
+  /// Get from gallery
+  XFile? _image;
+  Future getImageFromGallery(name, category, price) async {
+    var image = await ImagePicker.platform.getImage(source: ImageSource.gallery);
+    var finalImage = image as XFile?;
+    var base64Image = File(finalImage!.path).readAsBytesSync();
+    print(base64Encode(base64Image));
+    firestoreInstance.collection("users").doc(userProfile['UID']).collection("collections").add(
+        {
+          "Name": name,
+          "Price": price,
+          "Category": category,
+          "Filedata": base64Encode(base64Image),
+          "UpdatedOn": DateTime.now()
+          // "Media": base64Encode(base64Image)
+        }
+    ).then((value) {
+      print('data storage success!');
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: new Text("Alert!!"),
+            content: new Text('Success!'),
+            actions: <Widget>[
+              new FlatButton(
+                child: new Text("OK"),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
+    );
+    setState(() {
+      _image = image as XFile?;
+    });
+  }
+
+  int _selectedIndex = 0;
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    User? user = FirebaseAuth.instance.currentUser;
+    double width=MediaQuery.of(context).size.width;
+    double height=MediaQuery.of(context).size.height;
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Row(
+          children: [
+            Text((userProfile == null ? 'Login' : 'Hola ' + userProfile["Name"] + '!' )),
+            Expanded(child: Container()),
+            GestureDetector(
+              child: Icon((user == null) ?  Icons.person  : Icons.logout),
+              onTap: () async {
+                (user == null)
+                    ? {Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SignInPage()))}
+                    : {await FirebaseAuth.instance.signOut(), setState(() {user = null; _image = null; userProfile = null; getUserProfile();}), };
+              },
+            )
+          ],
+        ),
+        automaticallyImplyLeading: false,
+      ),
+      body: Container(
+          decoration: BoxDecoration(
+              image: DecorationImage(
+                alignment: Alignment.bottomCenter,
+                image: AssetImage(
+                  (user == null ? 'assets/flat1.jfif' : 'assets/High Five.png'),
+                ),
+                fit: BoxFit.fitWidth,
+              )
+          ),
+          height: height,
+          width: width,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                    padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
+                    width: width * 0.8,
+                    child: Column(
+                        children: [
+                          TextField(
+                            controller: nameController,
+                            decoration: InputDecoration(
+                              hintText: 'Name',
+                              suffixIcon: Icon(Icons.person_rounded),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 30.0,),
+                          TextField(
+                            controller: categoryController,
+                            decoration: InputDecoration(
+                              hintText: 'Category',
+                              suffixIcon: Icon(Icons.person_rounded),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 30.0,),
+                          TextField(
+                            controller: priceController,
+                            decoration: InputDecoration(
+                              hintText: 'Price',
+                              suffixIcon: Icon(Icons.person_rounded),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20.0),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 30.0,),
+                          (user != null)
+                              ? OutlinedButton(
+                            child: Container(
+                              width: width * 0.4,
+                              height: 60,
+                              child: Center(
+                                  child: Text('Add Data')
+                              ),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              primary: Colors.white,
+                              backgroundColor: Colors.teal,
+                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+                            ),
+                            onPressed: () async {
+                              getImageFromGallery(nameController.text, categoryController.text, int.parse(priceController.text));
+                            },
+                          )
+                              : Container(),
+                        ]
+                    )
+                ),
+              ],
+            ),
+          )
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.business),
+            label: 'Business',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.school),
+            label: 'School',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber[800],
+        onTap: _onItemTapped,
+      ),
+    );
+  }
+}
