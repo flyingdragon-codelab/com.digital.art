@@ -154,23 +154,25 @@ class LandingPageState extends State<LandingPage> {
                     width: width * 0.8,
                     child: Column(
                         children: [
-                          OutlinedButton(
-                            child: Container(
-                              width: width * 0.4,
-                              height: 60,
-                              child: Center(
-                                  child: Text('Add Data')
-                              ),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              primary: Colors.white,
-                              backgroundColor: Colors.teal,
-                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
-                            ),
-                            onPressed: () async {
-                              getImageFromGallery(nameController.text, categoryController.text, int.parse(priceController.text));
-                            },
-                          ),
+                          (user != null)
+                              ? OutlinedButton(
+                                  child: Container(
+                                    width: width * 0.4,
+                                    height: 60,
+                                    child: Center(
+                                        child: Text('Add Data')
+                                    ),
+                                  ),
+                                  style: OutlinedButton.styleFrom(
+                                    primary: Colors.white,
+                                    backgroundColor: Colors.teal,
+                                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
+                                  ),
+                                  onPressed: () async {
+                                    Navigator.of(context).push(MaterialPageRoute(builder: (context)=>AddFilePage()));
+                                  },
+                                )
+                              : Container(),
                           /*TextField(
                             controller: nameController,
                             decoration: InputDecoration(
@@ -825,7 +827,7 @@ class AddFilePageState extends State<AddFilePage> {
             )
           ],
         ),
-        automaticallyImplyLeading: false,
+      //  automaticallyImplyLeading: false,
       ),
       body: Container(
           decoration: BoxDecoration(
