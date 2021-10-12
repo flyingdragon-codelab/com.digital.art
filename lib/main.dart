@@ -141,38 +141,45 @@ class LandingPageState extends State<LandingPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Row(
-          children: [
-            Text((userProfile == null ? 'Login' : 'Hola ' + userProfile["Name"] + '!' )),
-            Expanded(child: Container()),
-            GestureDetector(
-              child: Icon(Icons.person_pin_sharp),
-              onTap: () {
-                Navigator.of(context).push(
-                    MaterialPageRoute(builder: (context) => MyArtPage()));
-              }
-            ),
-            Container(width: 50),
-            GestureDetector(
-              child: Icon(Icons.refresh),
-              onTap: () async {
-                setState(() {
-                  collections = [];
-                  allCollections = [];
-                });
-                getAllCollections();
-              },
-            ),
-            Container(width: 50),
-            GestureDetector(
-              child: Icon((user == null) ?  Icons.person  : Icons.logout),
-              onTap: () async {
-                (user == null)
-                    ? {Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SignInPage()))}
-                    : {await FirebaseAuth.instance.signOut(), setState(() {user = null; _image = null; userProfile = null; getUserProfile();}), };
-              },
-            )
-          ],
+      //  toolbarHeight: 100,
+      //  backgroundColor: Colors.white,
+        bottomOpacity: 0.0,
+        elevation: 0.0,
+        title: Container(
+          margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
+          child: Row(
+            children: [
+              Text((userProfile == null ? 'Login' : 'Hola ' + userProfile["Name"] + '!' )),
+              Expanded(child: Container()),
+              GestureDetector(
+                  child: Icon(Icons.person_pin_sharp),
+                  onTap: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => MyArtPage()));
+                  }
+              ),
+              Container(width: 50),
+              GestureDetector(
+                child: Icon(Icons.refresh),
+                onTap: () async {
+                  setState(() {
+                    collections = [];
+                    allCollections = [];
+                  });
+                  getAllCollections();
+                },
+              ),
+              Container(width: 50),
+              GestureDetector(
+                child: Icon((user == null) ?  Icons.person  : Icons.logout),
+                onTap: () async {
+                  (user == null)
+                      ? {Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SignInPage()))}
+                      : {await FirebaseAuth.instance.signOut(), setState(() {user = null; _image = null; userProfile = null; getUserProfile();}), };
+                },
+              )
+            ],
+          ),
         ),
         automaticallyImplyLeading: false,
       ),
@@ -198,7 +205,7 @@ class LandingPageState extends State<LandingPage> {
                             }).toList(),
                             //  value: (ddlCountryValue == null)  ? null  : ddlCountryValue,
                             onChanged: (selectedValue) {
-                              print(selectedValue);
+                            //  print(selectedValue);
                               filterCategory(selectedValue.toString());
                             },
                             decoration: InputDecoration(
