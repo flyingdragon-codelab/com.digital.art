@@ -1101,6 +1101,15 @@ class MyArtPageState extends State<MyArtPage> {
           children: [
             Text('My Art'),
             Expanded(child: Container()),
+            (user != null)
+                ? GestureDetector(
+                    child: Icon(Icons.upload_sharp),
+                    onTap: () async {
+                      Navigator.push(context, MaterialPageRoute(builder: (context)=>AddFilePage()));
+                    },
+                  )
+                : Container(),
+            Container(width: 50),
             GestureDetector(
               child: Icon(Icons.refresh),
               onTap: () async {
@@ -1131,85 +1140,12 @@ class MyArtPageState extends State<MyArtPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                  padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
+                  padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
                   width: width * 0.8,
                   child: Column(
                       children: [
-                        Text(collections.length.toString()),
-                        (user != null)
-                            ? OutlinedButton(
-                              child: Container(
-                              //  padding: EdgeInsets.fromLTRB(0, 0, 0, 50),
-                                width: width * 0.4,
-                                height: 60,
-                                child: Center(
-                                    child: Text('Add Data')
-                                ),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                primary: Colors.white,
-                                backgroundColor: Colors.teal,
-                                shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
-                              ),
-                              onPressed: () async {
-                                Navigator.of(context).push(MaterialPageRoute(builder: (context)=>AddFilePage()));
-                              },
-                            )
-                            : Container(),
-                        /*TextField(
-                            controller: nameController,
-                            decoration: InputDecoration(
-                              hintText: 'Name',
-                              suffixIcon: Icon(Icons.person_rounded),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 30.0,),
-                          TextField(
-                            controller: categoryController,
-                            decoration: InputDecoration(
-                              hintText: 'Category',
-                              suffixIcon: Icon(Icons.person_rounded),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 30.0,),
-                          TextField(
-                            controller: priceController,
-                            decoration: InputDecoration(
-                              hintText: 'Price',
-                              suffixIcon: Icon(Icons.person_rounded),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(20.0),
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 30.0,),
-                          (user != null)
-                          ? OutlinedButton(
-                            child: Container(
-                              width: width * 0.4,
-                              height: 60,
-                              child: Center(
-                                  child: Text('Add Data')
-                              ),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              primary: Colors.white,
-                              backgroundColor: Colors.teal,
-                              shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(10))),
-                            ),
-                            onPressed: () async {
-                              getImageFromGallery(nameController.text, categoryController.text, int.parse(priceController.text));
-                            },
-                          )
-                              : Container(),
-                          SizedBox(height: 30.0,),
-                          Container(child: Text((collections.length != 0) ? 'Nbr of Collections - ' + collections.length.toString() : 'No Collections',)),*/
+                        Text('Total Collections: ' + collections.length.toString()),
+                        Container(height: 20,),
                         (collections.length != 0) ? SizedBox(
                           height: 600,
                           child: ListView.builder(
@@ -1217,29 +1153,36 @@ class MyArtPageState extends State<MyArtPage> {
                               //  scrollDirection: Axis.horizontal,
                               itemCount: collections.length,
                               itemBuilder: (context, index) {
-                                return ListTile(
-                                  subtitle: Column(
-                                    children: [
-                                      Image.memory(base64Decode(collections[index]['Filedata']),
-                                        fit: BoxFit.contain,
-                                      ),
-                                      SizedBox(height: 10.0,),
-                                      Text(collections[index]['Name']),
-                                      SizedBox(height: 10.0,),
-                                      GestureDetector(
-                                        child: Icon(Icons.delete),
-                                        onTap: () {
-                                          FirebaseFirestore.instance.collection("users").doc(user!.uid).collection("collections").doc(collections[index]["Id"]).delete().then((value) {
-                                            print("Delete Successed");
-                                          });
-                                          setState(() {
-                                            collections = [];
-                                          });
-                                          getAllCollections();
-                                        },
-                                      ),
-                                      SizedBox(height: 30.0,),
-                                    ],
+                                return Container(
+                                  padding: EdgeInsets.fromLTRB(0, 10, 0, 10),
+                                  child: ListTile(
+                                    leading: Image.memory(base64Decode(collections[index]['Filedata']),
+                                      fit: BoxFit.contain,
+                                    ),
+                                    title: Center(child: Text('Name: ' + collections[index]['Name']),),
+                                    subtitle: Column(
+                                      children: [
+                                        SizedBox(height: 10.0,),
+                                        Text('Category: ' + collections[index]['Category']),
+                                        Text('Category: ' + collections[index]['Price'].toString()),
+                                      ],
+                                    ),
+                                    trailing: GestureDetector(
+                                      child: Icon(Icons.delete),
+                                      onTap: () {
+                                        FirebaseFirestore.instance.collection("users").doc(user!.uid).collection("collections").doc(collections[index]["Id"]).delete().then((value) {
+                                          print("Delete Successed");
+                                        });
+                                        setState(() {
+                                          collections = [];
+                                        });
+                                        getAllCollections();
+                                      },
+                                    ),
+                                    onTap: (){
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(builder: (context) => ViewArtPage(collections[index])));
+                                    },
                                   ),
                                 );
                               }
