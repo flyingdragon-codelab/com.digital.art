@@ -1159,12 +1159,12 @@ class MyArtPageState extends State<MyArtPage> {
                                     leading: Image.memory(base64Decode(collections[index]['Filedata']),
                                       fit: BoxFit.contain,
                                     ),
-                                    title: Center(child: Text('Name: ' + collections[index]['Name']),),
+                                    title: Align(alignment: Alignment.centerLeft, child: Text('Name: ' + collections[index]['Name']),),
                                     subtitle: Column(
                                       children: [
                                         SizedBox(height: 10.0,),
-                                        Text('Category: ' + collections[index]['Category']),
-                                        Text('Category: ' + collections[index]['Price'].toString()),
+                                        Align(alignment: Alignment.centerLeft, child: Text('Category: ' + collections[index]['Category']),),
+                                        Align(alignment: Alignment.centerLeft, child: Text('Category: ' + collections[index]['Price'].toString()),),
                                       ],
                                     ),
                                     trailing: GestureDetector(
