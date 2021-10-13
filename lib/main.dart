@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:convert' show utf8;
 import 'dart:io';
 import 'dart:async';
+import 'package:intl/intl.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,6 +10,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:sliding_up_panel/sliding_up_panel.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -1034,6 +1037,33 @@ class MyArtPageState extends State<MyArtPage> {
     //  print(collections);
   }
 
+  void showSlideupView(BuildContext context, collections) {
+    showBottomSheet(
+        context: context,
+        builder: (context) {
+          return new Container(
+            width: MediaQuery.of(context).size.width,
+            child: new GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Column(
+                children: [
+                  SizedBox(height: 20,),
+                  Text('Name: ' + collections['Name'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24,),),
+                  SizedBox(height: 20,),
+                  Image.memory(base64Decode(collections['Filedata']), width: MediaQuery.of(context).size.width * 0.6,),
+                  SizedBox(height: 20,),
+                  Text('Category: ' + collections['Category'], style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18,), ),
+                  SizedBox(height: 20,),
+                  Text('Price: ' + collections['Price'].toString(), style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18,), ),
+                  SizedBox(height: 20,),
+                  Text('Updatedon: ' + DateFormat("dd MMM yyyy").format(collections['UpdatedOn'].toDate()), style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18,), ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
   @override
   void initState() {
     getAllCollections();
@@ -1180,8 +1210,9 @@ class MyArtPageState extends State<MyArtPage> {
                                       },
                                     ),
                                     onTap: (){
-                                      Navigator.of(context).push(
-                                          MaterialPageRoute(builder: (context) => ViewArtPage(collections[index])));
+                                      showSlideupView(context, collections[index]);
+                                      /*Navigator.of(context).push(
+                                          MaterialPageRoute(builder: (context) => ViewArtPage(collections[index])));*/
                                     },
                                   ),
                                 );
