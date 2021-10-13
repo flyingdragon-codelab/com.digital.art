@@ -238,7 +238,8 @@ class LandingPageState extends State<LandingPage> {
                             itemBuilder: (context,index,) {
                               return GestureDetector(
                                 onTap:(){
-                                  // something here
+                                  Navigator.of(context).push(
+                                      MaterialPageRoute(builder: (context) => ViewArtPage(collections[index])));
                                 },
                                 child:Container(
                                   child: Image.memory(base64Decode(collections[index]['Filedata']),
@@ -278,6 +279,61 @@ class LandingPageState extends State<LandingPage> {
   }
 }
 
+
+class ViewArtPage extends StatefulWidget {
+  final artData;
+  ViewArtPage(this.artData);
+
+  @override
+  ViewArtPageState createState() => ViewArtPageState(artData);
+}
+
+class ViewArtPageState extends State<ViewArtPage> {
+  final artData;
+  ViewArtPageState(this.artData);
+
+  @override
+  Widget build(BuildContext context) {
+    User? user = FirebaseAuth.instance.currentUser;
+    double width=MediaQuery.of(context).size.width;
+    double height=MediaQuery.of(context).size.height;
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text('Name: ' + artData['Name']),
+        //  automaticallyImplyLeading: false,
+      ),
+      body: Container(
+        height: height,
+        width: width,
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                  padding: EdgeInsets.fromLTRB(0, 50, 0, 0),
+                  width: width * 0.8,
+                  child: Column(
+                    children: [
+                      Container(
+                        child: Image.memory(base64Decode(artData['Filedata']),
+                          fit: BoxFit.fill,
+                        ),
+                      ),
+                      SizedBox(height: 30,),
+                      Container(child: Text('Category: ' + artData['Category'])),
+                      SizedBox(height: 30,),
+                      Container(child: Text('Price: ' + artData['Price'].toString())),
+                    ],
+                  ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 
 class SignInPage extends StatefulWidget {
