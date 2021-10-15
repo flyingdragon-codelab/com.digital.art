@@ -51,6 +51,33 @@ class LandingPageState extends State<LandingPage> {
     }
   }
 
+  void showSlideupView(BuildContext context, collections) {
+    showBottomSheet(
+        context: context,
+        builder: (context) {
+          return new Container(
+            width: MediaQuery.of(context).size.width,
+            child: new GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Column(
+                children: [
+                  SizedBox(height: 20,),
+                  Text('Name: ' + collections['Name'], style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24,),),
+                  SizedBox(height: 20,),
+                  Image.memory(base64Decode(collections['Filedata']), width: MediaQuery.of(context).size.width * 0.6,),
+                  SizedBox(height: 20,),
+                  Text('Category: ' + collections['Category'], style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18,), ),
+                  SizedBox(height: 20,),
+                  Text('Price: ' + collections['Price'].toString(), style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18,), ),
+                  SizedBox(height: 20,),
+                  Text('Updatedon: ' + DateFormat("dd MMM yyyy").format(collections['UpdatedOn'].toDate()), style: TextStyle(fontWeight: FontWeight.normal, fontSize: 18,), ),
+                ],
+              ),
+            ),
+          );
+        });
+  }
+
   getAllCollections() async {
     firestoreInstance.collection("users").get().then((value) {
       value.docs.forEach((value) {
@@ -241,8 +268,9 @@ class LandingPageState extends State<LandingPage> {
                             itemBuilder: (context,index,) {
                               return GestureDetector(
                                 onTap:(){
-                                  Navigator.of(context).push(
-                                      MaterialPageRoute(builder: (context) => ViewArtPage(collections[index])));
+                                  showSlideupView(context, collections[index]);
+                                  /*Navigator.of(context).push(
+                                      MaterialPageRoute(builder: (context) => ViewArtPage(collections[index])));*/
                                 },
                                 child:Container(
                                   child: Image.memory(base64Decode(collections[index]['Filedata']),
