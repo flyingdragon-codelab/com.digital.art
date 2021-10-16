@@ -12,6 +12,8 @@ import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:sliding_up_panel/sliding_up_panel.dart';
 
+const bgColor = const Color(0xff4A83FE);
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -34,6 +36,7 @@ class LandingPageState extends State<LandingPage> {
   final categoryController = TextEditingController();
   final priceController = TextEditingController();
   var userProfile;
+  var greetingMessage = "";
   List allCollections = [];
   List collections = [];
   List categories = [];
@@ -108,8 +111,29 @@ class LandingPageState extends State<LandingPage> {
   //  print(collections);
   }
 
+  String greetingLogic() {
+    var hour = DateTime.now().hour;
+    if (hour < 12) {
+      setState(() {
+        greetingMessage = "Good morning";
+      });
+      return 'Morning';
+    }
+    if (hour < 17) {
+      setState(() {
+        greetingMessage = "Good afternoon";
+      });
+      return 'Afternoon';
+    }
+    setState(() {
+      greetingMessage = "Good evening";
+    });
+    return 'Evening';
+  }
+
   @override
   void initState() {
+    greetingLogic();
     getAllCollections();
     getUserProfile();
   }
@@ -169,15 +193,72 @@ class LandingPageState extends State<LandingPage> {
     double width=MediaQuery.of(context).size.width;
     double height=MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: bgColor,
       appBar: AppBar(
-      //  toolbarHeight: 100,
-      //  backgroundColor: Colors.white,
+        toolbarHeight: 100,
+        backgroundColor: bgColor,
         bottomOpacity: 0.0,
         elevation: 0.0,
-        title: Container(
-          margin: EdgeInsets.fromLTRB(0, 20, 0, 0),
+        title: Center(
           child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.fromLTRB(10, 10, 0, 0),
+                child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      (userProfile != null) ? greetingMessage + ', ' + userProfile['Name'] + '!'  : greetingMessage + '!',
+                      style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                    )
+                ),
+              ),
+              Expanded(child: Container()),
+              GestureDetector(
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(0, 10, 10, 0),
+                  child: Icon((userProfile != null) ?  Icons.logout  : Icons.person, size: 30,),
+                ),
+                onTap: () async {
+                  (user == null)
+                      ? {Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SignInPage()))}
+                      : {await FirebaseAuth.instance.signOut(), setState(() {user = null; _image = null; userProfile = null; getUserProfile();}), };
+                },
+              )
+            ],
+          ),
+        ),
+        automaticallyImplyLeading: false,
+      ),
+      body: Container(
+          height: height,
+          width: width,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: width * 0.8,
+                  margin: EdgeInsets.fromLTRB(0, 0, 0, 30),
+                  child: TextField(
+                    controller: nameController,
+                    decoration: InputDecoration(
+                      contentPadding: EdgeInsets.fromLTRB(20, 2, 2, 2),
+                      isDense: false,
+                      fillColor: Colors.white,
+                      filled: true,
+                      hintText: 'Search',
+                      suffixIcon: Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide: new BorderSide(color: Colors.transparent, width: 1.0),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(30.0),
+                        borderSide: BorderSide(color: Colors.transparent, width: 2.0),
+                      ),
+                    ),
+                  ),
+                  /*Row(
             children: [
               Text((userProfile == null ? 'Login' : 'Hola ' + userProfile["Name"] + '!' )),
               Expanded(child: Container()),
@@ -209,23 +290,32 @@ class LandingPageState extends State<LandingPage> {
                 },
               )
             ],
-          ),
-        ),
-        automaticallyImplyLeading: false,
-      ),
-      body: Container(
-          height: height,
-          width: width,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
+          ),*/
+                ),
                 Container(
+                    decoration: new BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: new BorderRadius.only(
+                          topLeft: const Radius.circular(30.0),
+                          topRight: const Radius.circular(30.0),
+                        )
+                    ),
                     padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
-                    width: width * 0.8,
+                    width: width,
                     child: Column(
                         children: [
-                          (categories.length != 0)  ? DropdownButtonFormField(
+                          Container(
+                            padding: EdgeInsets.fromLTRB(10, 0, 0, 10),
+                            width: width * 0.9,
+                            child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  'Featured',
+                                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.black),
+                                )
+                            ),
+                          ),
+                          /*(categories.length != 0)  ? DropdownButtonFormField(
                             isDense: true,
                             items: categories.map((category) {
                               return new DropdownMenuItem(
@@ -253,7 +343,7 @@ class LandingPageState extends State<LandingPage> {
                             ),
                           ) : Text(''),
                           SizedBox(height: 10,),
-                          Text('Total items - ' + collections.length.toString()),
+                          Text('Total items - ' + collections.length.toString()),*/
                           SizedBox(height: 10,),
                           (collections.length != 0) ? SizedBox(height: 600, child: Container(
                           child: GridView.builder(
@@ -383,7 +473,7 @@ class SignInPageState extends State<SignInPage> {
     double width=MediaQuery.of(context).size.width;
     double height=MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.blue,
       appBar: AppBar(
         title: Text('Demo Login UI'),
       //  automaticallyImplyLeading: false,
