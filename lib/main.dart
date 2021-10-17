@@ -116,6 +116,15 @@ class LandingPageState extends State<LandingPage> {
     });
   }
 
+  void sortLists() {
+    setState(() {
+      categories.sort();
+      collections.sort((a, b) =>
+          b["UpdatedOn"].compareTo(a["UpdatedOn"])
+      );
+    });
+  }
+
   getUserProfile () async {
     var firebaseUser = FirebaseAuth.instance.currentUser;
     if(firebaseUser != null)  {
@@ -206,6 +215,7 @@ class LandingPageState extends State<LandingPage> {
   @override
   Widget build(BuildContext context) {
     User? user = FirebaseAuth.instance.currentUser;
+    sortLists();
     double width=MediaQuery.of(context).size.width;
     double height=MediaQuery.of(context).size.height;
     return Scaffold(
@@ -232,6 +242,15 @@ class LandingPageState extends State<LandingPage> {
               GestureDetector(
                 child: Container(
                   padding: EdgeInsets.fromLTRB(0, 10, 10, 0),
+                  child: Icon((userProfile != null) ?  Icons.cloud_upload  : null, size: 30,),
+                ),
+                onTap: () async {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context)=>MyArtPage()));
+                },
+              ),
+              GestureDetector(
+                child: Container(
+                  padding: EdgeInsets.fromLTRB(0, 10, 10, 0),
                   child: Icon((userProfile != null) ?  Icons.logout  : Icons.person, size: 30,),
                 ),
                 onTap: () async {
@@ -239,7 +258,7 @@ class LandingPageState extends State<LandingPage> {
                       ? {Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SignInPage()))}
                       : {await FirebaseAuth.instance.signOut(), setState(() {user = null; _image = null; userProfile = null; getUserProfile();}), };
                 },
-              )
+              ),
             ],
           ),
         ),
@@ -334,7 +353,7 @@ class LandingPageState extends State<LandingPage> {
                                 alignment: Alignment.centerLeft,
                                 child: Text(
                                   'Featured',
-                                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Colors.black),
+                                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.normal, color: Colors.black),
                                 )
                             ),
                           ),
@@ -367,9 +386,33 @@ class LandingPageState extends State<LandingPage> {
                           ) : Text(''),
                           SizedBox(height: 10,),
                           Text('Total items - ' + collections.length.toString()),*/
+                          (collections.length != 0) ? SizedBox(height: 50, child: Container(
+                              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                              width: width * 0.9,
+                              child: ListView.builder(
+                                  shrinkWrap: true,
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: categories.length,
+                                  itemBuilder: (context, index) {
+                                    return GestureDetector(
+                                      child: Container(
+                                        margin: EdgeInsets.fromLTRB(0, 0, 20, 0),
+                                        child: Text(
+                                          categories[index],
+                                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w300, color: Colors.black),
+                                        ),
+                                      ),
+                                      onTap: () {
+                                    filterCategory(categories[index]);
+                                      },
+                                    );
+                                  }
+                              )
+                          ),)  : Text('nothing here - ' + collections.length.toString()),
                           (collections.length != 0) ? SizedBox(
                             height: 250,
                             child: Container(
+                              color: Colors.white,
                               padding: EdgeInsets.fromLTRB(10, 0, 10, 20),
                               width: width * 0.9,
                               child: ListView.builder(
@@ -408,24 +451,7 @@ class LandingPageState extends State<LandingPage> {
                                   }
                               )
                           ),)  : Text('nothing here - ' + collections.length.toString()),
-                          (collections.length != 0) ? SizedBox(height: 250, child: Container(
-                              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                              width: width * 0.9,
-                              child: ListView.builder(
-                                  shrinkWrap: true,
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: categories.length,
-                                  itemBuilder: (context, index) {
-                                    return Container(
-                                      margin: EdgeInsets.fromLTRB(0, 0, 20, 0),
-                                      child: Text(
-                                        categories[index],
-                                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),
-                                      ),
-                                    );
-                                  }
-                              )
-                          ),)  : Text('nothing here - ' + collections.length.toString()),
+
                         ]
                     )
                 ),
