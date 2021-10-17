@@ -54,6 +54,22 @@ class LandingPageState extends State<LandingPage> {
     }
   }
 
+  void searchQuery(String query)  {
+    if(query.isNotEmpty)  {
+      collections = [];
+      allCollections.forEach((item) {
+        if((item['Category'].contains(query)) || (item['Name'].contains(query))) {
+          setState(() {
+            collections.add(item);
+          });
+        }
+      });
+    } else {
+      collections = [];
+      collections = allCollections;
+    }
+  }
+
   void showSlideupView(BuildContext context, collections) {
     showBottomSheet(
         context: context,
@@ -230,6 +246,7 @@ class LandingPageState extends State<LandingPage> {
         automaticallyImplyLeading: false,
       ),
       body: Container(
+      //  color: Colors.white,
           height: height,
           width: width,
           child: SingleChildScrollView(
@@ -237,9 +254,14 @@ class LandingPageState extends State<LandingPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(
+                //  color: bgColor,
                   width: width * 0.8,
+                  height: 50,
                   margin: EdgeInsets.fromLTRB(0, 0, 0, 30),
                   child: TextField(
+                    onChanged: (queryText){
+                      searchQuery(queryText);
+                    },
                     controller: nameController,
                     decoration: InputDecoration(
                       contentPadding: EdgeInsets.fromLTRB(20, 2, 2, 2),
@@ -302,10 +324,11 @@ class LandingPageState extends State<LandingPage> {
                     ),
                     padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
                     width: width,
+                    height: height - 150,
                     child: Column(
                         children: [
                           Container(
-                            padding: EdgeInsets.fromLTRB(10, 0, 0, 10),
+                            padding: EdgeInsets.fromLTRB(10, 0, 0, 20),
                             width: width * 0.9,
                             child: Align(
                                 alignment: Alignment.centerLeft,
@@ -344,32 +367,65 @@ class LandingPageState extends State<LandingPage> {
                           ) : Text(''),
                           SizedBox(height: 10,),
                           Text('Total items - ' + collections.length.toString()),*/
-                          SizedBox(height: 10,),
-                          (collections.length != 0) ? SizedBox(height: 600, child: Container(
-                          child: GridView.builder(
-                            itemCount:collections.length,
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: MediaQuery.of(context).orientation ==
-                                  Orientation.landscape ? 3: 3,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
-                              childAspectRatio: (2 / 3),
-                            ),
-                            itemBuilder: (context,index,) {
-                              return GestureDetector(
-                                onTap:(){
-                                  showSlideupView(context, collections[index]);
-                                  /*Navigator.of(context).push(
-                                      MaterialPageRoute(builder: (context) => ViewArtPage(collections[index])));*/
-                                },
-                                child:Container(
-                                  child: Image.memory(base64Decode(collections[index]['Filedata']),
-                                    fit: BoxFit.fill,
-                                  ),
-                                ),
-                              );
-                            },
-                          )),)  : Text('nothing here - ' + collections.length.toString()),
+                          (collections.length != 0) ? SizedBox(
+                            height: 250,
+                            child: Container(
+                              padding: EdgeInsets.fromLTRB(10, 0, 10, 20),
+                              width: width * 0.9,
+                              child: ListView.builder(
+                                  shrinkWrap: true,
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: collections.length,
+                                  itemBuilder: (context, index) {
+                                    return GestureDetector(
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.grey,
+                                                blurRadius: 2.0,
+                                                spreadRadius: 0.0,
+                                                offset: Offset(2.0, 2.0), // shadow direction: bottom right
+                                              )
+                                            ],
+                                            borderRadius: BorderRadius.circular(10),
+                                            image: DecorationImage(
+                                              alignment: Alignment.bottomCenter,
+                                              image: MemoryImage(base64Decode(collections[index]['Filedata'])),
+                                              fit: BoxFit.cover,
+                                            )
+                                        ),
+                                        alignment: Alignment.topLeft,
+                                        width: 150,
+                                        height: 250,
+                                        margin: EdgeInsets.fromLTRB(0, 0, 20, 0),
+                                        child: Text(''),
+                                      ),
+                                      onTap: () {
+                                        showSlideupView(context, collections[index]);
+                                      },
+                                    );
+                                  }
+                              )
+                          ),)  : Text('nothing here - ' + collections.length.toString()),
+                          (collections.length != 0) ? SizedBox(height: 250, child: Container(
+                              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                              width: width * 0.9,
+                              child: ListView.builder(
+                                  shrinkWrap: true,
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: categories.length,
+                                  itemBuilder: (context, index) {
+                                    return Container(
+                                      margin: EdgeInsets.fromLTRB(0, 0, 20, 0),
+                                      child: Text(
+                                        categories[index],
+                                          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),
+                                      ),
+                                    );
+                                  }
+                              )
+                          ),)  : Text('nothing here - ' + collections.length.toString()),
                         ]
                     )
                 ),
@@ -377,7 +433,7 @@ class LandingPageState extends State<LandingPage> {
             ),
           ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      /*bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
@@ -395,7 +451,7 @@ class LandingPageState extends State<LandingPage> {
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
         onTap: _onItemTapped,
-      ),
+      ),*/
     );
   }
 }
@@ -1367,5 +1423,32 @@ class MyArtPageState extends State<MyArtPage> {
     );
   }
 }
+
+
+/*GridView.builder(
+itemCount:collections.length,
+gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+crossAxisCount: MediaQuery.of(context).orientation ==
+Orientation.portrait ? 2: 2,
+crossAxisSpacing: 8,
+mainAxisSpacing: 8,
+childAspectRatio: (2 / 3),
+),
+itemBuilder: (context,index,) {
+return GestureDetector(
+onTap:(){
+showSlideupView(context, collections[index]);
+*//*Navigator.of(context).push(
+                                      MaterialPageRoute(builder: (context) => ViewArtPage(collections[index])));*//*
+},
+child:Container(
+child: Image.memory(base64Decode(collections[index]['Filedata']),
+fit: BoxFit.fill,
+),
+),
+);
+},
+)*/
+
 
 
