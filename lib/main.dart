@@ -77,6 +77,13 @@ class LandingPageState extends State<LandingPage> {
         context: context,
         builder: (context) {
           return new Container(
+            decoration: new BoxDecoration(
+                color: Colors.grey,
+                borderRadius: new BorderRadius.only(
+                  topLeft: const Radius.circular(30.0),
+                  topRight: const Radius.circular(30.0),
+                )
+            ),
             width: MediaQuery.of(context).size.width,
             child: new GestureDetector(
               onTap: () => Navigator.pop(context),
