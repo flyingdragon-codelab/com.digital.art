@@ -57,13 +57,15 @@ class LandingPageState extends State<LandingPage> {
   void searchQuery(String query)  {
     if(query.isNotEmpty)  {
       collections = [];
-      allCollections.forEach((item) {
+      /*allCollections.forEach((item) {
         if((item['Category'].contains(query)) || (item['Name'].contains(query))) {
           setState(() {
             collections.add(item);
           });
         }
-      });
+      });*/
+      collections = allCollections.where((value) =>
+      value["Name"].toLowerCase().contains(query.toLowerCase()) || value["Category"].toLowerCase().contains(query.toLowerCase())).toList();
     } else {
       collections = [];
       collections = allCollections;
