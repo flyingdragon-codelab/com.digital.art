@@ -32,7 +32,7 @@ class LandingPage extends StatefulWidget {
 }
 
 class LandingPageState extends State<LandingPage> {
-  final nameController = TextEditingController();
+  final queryController = TextEditingController();
   final categoryController = TextEditingController();
   final priceController = TextEditingController();
   var userProfile;
@@ -125,6 +125,7 @@ class LandingPageState extends State<LandingPage> {
         });
       });
     });
+    queryController.value = TextEditingValue.empty;
   }
 
   void sortLists() {
@@ -297,7 +298,7 @@ class LandingPageState extends State<LandingPage> {
                       onChanged: (queryText){
                         searchQuery(queryText);
                       },
-                      controller: nameController,
+                      controller: queryController,
                       decoration: InputDecoration(
                         contentPadding: EdgeInsets.fromLTRB(20, 2, 2, 2),
                         isDense: false,
@@ -402,7 +403,7 @@ class LandingPageState extends State<LandingPage> {
                             ) : Text(''),
                             SizedBox(height: 10,),
                             Text('Total items - ' + collections.length.toString()),*/
-                            (collections.length != 0) ? SizedBox(height: 50, child: Container(
+                            (categories.length != 0) ? SizedBox(height: 50, child: Container(
                                 padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
                                 width: width * 0.9,
                                 child: ListView.builder(
@@ -469,9 +470,8 @@ class LandingPageState extends State<LandingPage> {
                                   ),
                                 ),
                             ),)  : Text('nothing here - ' + collections.length.toString()),
-
                           ]
-                      )
+                      ),
                   ),
                 ],
               ),
