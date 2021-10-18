@@ -78,7 +78,7 @@ class LandingPageState extends State<LandingPage> {
         builder: (context) {
           return new Container(
             decoration: new BoxDecoration(
-                color: Colors.grey,
+                color: Colors.grey[50],
                 borderRadius: new BorderRadius.only(
                   topLeft: const Radius.circular(30.0),
                   topRight: const Radius.circular(30.0),
