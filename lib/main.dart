@@ -100,6 +100,8 @@ class LandingPageState extends State<LandingPage> {
   }
 
   getAllCollections() async {
+    allCollections = [];
+    collections = [];
     firestoreInstance.collection("users").get().then((value) {
       value.docs.forEach((value) {
         firestoreInstance.collection("users").doc(value.id).collection("collections").get().then((value) {
@@ -235,7 +237,7 @@ class LandingPageState extends State<LandingPage> {
                 child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      (userProfile != null) ? greetingMessage + ', ' + userProfile['Name'] + '!'  : greetingMessage + '!',
+                      (userProfile != null) ? 'Hi' + ', ' + userProfile['Name'] + '!'  : 'Hi' + '!',
                       style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
                     )
                 ),
@@ -270,194 +272,202 @@ class LandingPageState extends State<LandingPage> {
       //  color: Colors.white,
           height: height,
           width: width,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+          child: RefreshIndicator(
+            onRefresh: () async {
+              getAllCollections();
+              return await Future.delayed(Duration(seconds: 3));
+            },
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                  //  color: bgColor,
+                    width: width * 0.8,
+                    height: 50,
+                    margin: EdgeInsets.fromLTRB(0, 0, 0, 30),
+                    child: TextField(
+                      onChanged: (queryText){
+                        searchQuery(queryText);
+                      },
+                      controller: nameController,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.fromLTRB(20, 2, 2, 2),
+                        isDense: false,
+                        fillColor: Colors.white,
+                        filled: true,
+                        hintText: 'Search',
+                        suffixIcon: Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                          borderSide: new BorderSide(color: Colors.transparent, width: 1.0),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(30.0),
+                          borderSide: BorderSide(color: Colors.transparent, width: 2.0),
+                        ),
+                      ),
+                    ),
+                    /*Row(
               children: [
-                Container(
-                //  color: bgColor,
-                  width: width * 0.8,
-                  height: 50,
-                  margin: EdgeInsets.fromLTRB(0, 0, 0, 30),
-                  child: TextField(
-                    onChanged: (queryText){
-                      searchQuery(queryText);
-                    },
-                    controller: nameController,
-                    decoration: InputDecoration(
-                      contentPadding: EdgeInsets.fromLTRB(20, 2, 2, 2),
-                      isDense: false,
-                      fillColor: Colors.white,
-                      filled: true,
-                      hintText: 'Search',
-                      suffixIcon: Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                        borderSide: new BorderSide(color: Colors.transparent, width: 1.0),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(30.0),
-                        borderSide: BorderSide(color: Colors.transparent, width: 2.0),
-                      ),
-                    ),
-                  ),
-                  /*Row(
-            children: [
-              Text((userProfile == null ? 'Login' : 'Hola ' + userProfile["Name"] + '!' )),
-              Expanded(child: Container()),
-              GestureDetector(
-                  child: Icon(Icons.person_pin_sharp),
-                  onTap: () {
-                    Navigator.of(context).push(
-                        MaterialPageRoute(builder: (context) => MyArtPage()));
-                  }
-              ),
-              Container(width: 50),
-              GestureDetector(
-                child: Icon(Icons.refresh),
-                onTap: () async {
-                  setState(() {
-                    collections = [];
-                    allCollections = [];
-                  });
-                  getAllCollections();
-                },
-              ),
-              Container(width: 50),
-              GestureDetector(
-                child: Icon((user == null) ?  Icons.person  : Icons.logout),
-                onTap: () async {
-                  (user == null)
-                      ? {Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SignInPage()))}
-                      : {await FirebaseAuth.instance.signOut(), setState(() {user = null; _image = null; userProfile = null; getUserProfile();}), };
-                },
-              )
-            ],
-          ),*/
+                Text((userProfile == null ? 'Login' : 'Hola ' + userProfile["Name"] + '!' )),
+                Expanded(child: Container()),
+                GestureDetector(
+                    child: Icon(Icons.person_pin_sharp),
+                    onTap: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (context) => MyArtPage()));
+                    }
                 ),
-                Container(
-                    decoration: new BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: new BorderRadius.only(
-                          topLeft: const Radius.circular(30.0),
-                          topRight: const Radius.circular(30.0),
-                        )
-                    ),
-                    padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
-                    width: width,
-                    height: height - 150,
-                    child: Column(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.fromLTRB(10, 0, 0, 20),
-                            width: width * 0.9,
-                            child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  'Featured',
-                                  style: TextStyle(fontSize: 26, fontWeight: FontWeight.normal, color: Colors.black),
-                                )
-                            ),
-                          ),
-                          /*(categories.length != 0)  ? DropdownButtonFormField(
-                            isDense: true,
-                            items: categories.map((category) {
-                              return new DropdownMenuItem(
-                                value: category,
-                                child: Text(category.toString(),),
-                              );
-                            }).toList(),
-                            //  value: (ddlCountryValue == null)  ? null  : ddlCountryValue,
-                            onChanged: (selectedValue) {
-                            //  print(selectedValue);
-                              filterCategory(selectedValue.toString());
-                            },
-                            decoration: InputDecoration(
-                              //  labelText: 'Home Country',
-                              // labelStyle: Theme.of(context).primaryTextTheme.caption.copyWith(color: fcmGreen),
-                              //  labelStyle: TextStyle(fontSize: 12.0, color: fcmMidnightBlack, ),
-                              //  filled: true,
-                              //  fillColor: fcmGreyOne,
-                              //  hintText: 'Select Country',
-                              //  focusedBorder:UnderlineInputBorder(
-                              //    borderSide: BorderSide(color: fcmMidnightBlack, style: BorderStyle.solid),
-                              //  ),
-                              //  border: OutlineInputBorder(borderSide: BorderSide(color: fcmMidnightBlack, style: BorderStyle.solid),),
-                              //  prefixIcon: Icon(Icons.public, color: fcmMidnightBlack,),
-                            ),
-                          ) : Text(''),
-                          SizedBox(height: 10,),
-                          Text('Total items - ' + collections.length.toString()),*/
-                          (collections.length != 0) ? SizedBox(height: 50, child: Container(
-                              padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
-                              width: width * 0.9,
-                              child: ListView.builder(
-                                  shrinkWrap: true,
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: categories.length,
-                                  itemBuilder: (context, index) {
-                                    return GestureDetector(
-                                      child: Container(
-                                        margin: EdgeInsets.fromLTRB(0, 0, 20, 0),
-                                        child: Text(
-                                          categories[index],
-                                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w300, color: Colors.black),
-                                        ),
-                                      ),
-                                      onTap: () {
-                                    filterCategory(categories[index]);
-                                      },
-                                    );
-                                  }
-                              )
-                          ),)  : Text('nothing here - ' + collections.length.toString()),
-                          (collections.length != 0) ? SizedBox(
-                            height: 250,
-                            child: Container(
-                              color: Colors.white,
-                              padding: EdgeInsets.fromLTRB(10, 0, 10, 20),
-                              width: width * 0.9,
-                              child: ListView.builder(
-                                  shrinkWrap: true,
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: collections.length,
-                                  itemBuilder: (context, index) {
-                                    return GestureDetector(
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: Colors.grey,
-                                                blurRadius: 2.0,
-                                                spreadRadius: 0.0,
-                                                offset: Offset(2.0, 2.0), // shadow direction: bottom right
-                                              )
-                                            ],
-                                            borderRadius: BorderRadius.circular(10),
-                                            image: DecorationImage(
-                                              alignment: Alignment.bottomCenter,
-                                              image: MemoryImage(base64Decode(collections[index]['Filedata'])),
-                                              fit: BoxFit.cover,
-                                            )
-                                        ),
-                                        alignment: Alignment.topLeft,
-                                        width: 150,
-                                        height: 250,
-                                        margin: EdgeInsets.fromLTRB(0, 0, 20, 0),
-                                        child: Text(''),
-                                      ),
-                                      onTap: () {
-                                        showSlideupView(context, collections[index]);
-                                      },
-                                    );
-                                  }
-                              )
-                          ),)  : Text('nothing here - ' + collections.length.toString()),
-
-                        ]
-                    )
+                Container(width: 50),
+                GestureDetector(
+                  child: Icon(Icons.refresh),
+                  onTap: () async {
+                    setState(() {
+                      collections = [];
+                      allCollections = [];
+                    });
+                    getAllCollections();
+                  },
                 ),
+                Container(width: 50),
+                GestureDetector(
+                  child: Icon((user == null) ?  Icons.person  : Icons.logout),
+                  onTap: () async {
+                    (user == null)
+                        ? {Navigator.of(context).push(MaterialPageRoute(builder: (context)=>SignInPage()))}
+                        : {await FirebaseAuth.instance.signOut(), setState(() {user = null; _image = null; userProfile = null; getUserProfile();}), };
+                  },
+                )
               ],
+            ),*/
+                  ),
+                  Container(
+                      decoration: new BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: new BorderRadius.only(
+                            topLeft: const Radius.circular(30.0),
+                            topRight: const Radius.circular(30.0),
+                          )
+                      ),
+                      padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
+                      width: width,
+                      height: height - 150,
+                      child: Column(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.fromLTRB(10, 0, 0, 20),
+                              width: width * 0.9,
+                              child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'Featured',
+                                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.normal, color: Colors.black),
+                                  )
+                              ),
+                            ),
+                            /*(categories.length != 0)  ? DropdownButtonFormField(
+                              isDense: true,
+                              items: categories.map((category) {
+                                return new DropdownMenuItem(
+                                  value: category,
+                                  child: Text(category.toString(),),
+                                );
+                              }).toList(),
+                              //  value: (ddlCountryValue == null)  ? null  : ddlCountryValue,
+                              onChanged: (selectedValue) {
+                              //  print(selectedValue);
+                                filterCategory(selectedValue.toString());
+                              },
+                              decoration: InputDecoration(
+                                //  labelText: 'Home Country',
+                                // labelStyle: Theme.of(context).primaryTextTheme.caption.copyWith(color: fcmGreen),
+                                //  labelStyle: TextStyle(fontSize: 12.0, color: fcmMidnightBlack, ),
+                                //  filled: true,
+                                //  fillColor: fcmGreyOne,
+                                //  hintText: 'Select Country',
+                                //  focusedBorder:UnderlineInputBorder(
+                                //    borderSide: BorderSide(color: fcmMidnightBlack, style: BorderStyle.solid),
+                                //  ),
+                                //  border: OutlineInputBorder(borderSide: BorderSide(color: fcmMidnightBlack, style: BorderStyle.solid),),
+                                //  prefixIcon: Icon(Icons.public, color: fcmMidnightBlack,),
+                              ),
+                            ) : Text(''),
+                            SizedBox(height: 10,),
+                            Text('Total items - ' + collections.length.toString()),*/
+                            (collections.length != 0) ? SizedBox(height: 50, child: Container(
+                                padding: EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                width: width * 0.9,
+                                child: ListView.builder(
+                                    shrinkWrap: true,
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: categories.length,
+                                    itemBuilder: (context, index) {
+                                      return GestureDetector(
+                                        child: Container(
+                                          margin: EdgeInsets.fromLTRB(0, 0, 20, 0),
+                                          child: Text(
+                                            categories[index],
+                                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w300, color: Colors.black),
+                                          ),
+                                        ),
+                                        onTap: () {
+                                      filterCategory(categories[index]);
+                                        },
+                                      );
+                                    }
+                                )
+                            ),)  : Text('nothing here - ' + collections.length.toString()),
+                            (collections.length != 0) ? SizedBox(
+                              height: 250,
+                              child: Container(
+                                color: Colors.white,
+                                padding: EdgeInsets.fromLTRB(10, 0, 10, 20),
+                                width: width * 0.9,
+                                child: Container(
+                                  child: ListView.builder(
+                                      shrinkWrap: true,
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: collections.length,
+                                      itemBuilder: (context, index) {
+                                        return GestureDetector(
+                                          child: Container(
+                                            decoration: BoxDecoration(
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: Colors.grey,
+                                                    blurRadius: 2.0,
+                                                    spreadRadius: 0.0,
+                                                    offset: Offset(2.0, 2.0), // shadow direction: bottom right
+                                                  )
+                                                ],
+                                                borderRadius: BorderRadius.circular(10),
+                                                image: DecorationImage(
+                                                  alignment: Alignment.bottomCenter,
+                                                  image: MemoryImage(base64Decode(collections[index]['Filedata'])),
+                                                  fit: BoxFit.cover,
+                                                )
+                                            ),
+                                            alignment: Alignment.topLeft,
+                                            width: 150,
+                                            height: 250,
+                                            margin: EdgeInsets.fromLTRB(0, 0, 20, 0),
+                                            child: Text(''),
+                                          ),
+                                          onTap: () {
+                                            showSlideupView(context, collections[index]);
+                                          },
+                                        );
+                                      }
+                                  ),
+                                ),
+                            ),)  : Text('nothing here - ' + collections.length.toString()),
+
+                          ]
+                      )
+                  ),
+                ],
+              ),
             ),
           ),
       ),
